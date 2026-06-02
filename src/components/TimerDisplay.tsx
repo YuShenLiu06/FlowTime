@@ -25,7 +25,12 @@ export function TimerDisplay({ state, elapsed }: TimerDisplayProps) {
 
   return (
     <div className="animate-fade-in select-none">
-      <div className={`font-mono text-[100px] sm:text-[140px] md:text-[180px] leading-none tabular-nums ${colorClass}`}>
+      <div
+        className={`font-mono leading-none tabular-nums ${colorClass}`}
+        style={{
+          fontSize: 'clamp(3.5rem, 14vw, 11rem)'
+        }}
+      >
         {timeStr}
       </div>
     </div>
