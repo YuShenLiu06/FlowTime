@@ -27,6 +27,8 @@ function handleFlow(state: Extract<AppState, { status: 'flow' }>, event: AppEven
   switch (event.type) {
     case 'TICK':
       return state;
+    case 'TIME_WARP':
+      return { ...state, startedAt: state.startedAt - event.shiftMs };
     case 'PAUSE':
       return {
         status: 'paused',

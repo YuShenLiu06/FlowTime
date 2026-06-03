@@ -2,13 +2,18 @@ import { useState, useEffect } from 'react';
 import { formatTime } from '../lib/time';
 import type { AppState } from '../types';
 
-const REMINDER_MESSAGES = [
+const FLOW_MESSAGES = [
   '专注当下，效率自然来',
-  '要是累了，那么休息下吧',
   '深呼吸，保持节奏',
   '每个番茄钟都是进步',
   '心流状态，继续加油',
+];
+
+const FATIGUE_MESSAGES = [
+  '要是累了，那么休息下吧',
+  '已专注超过一小时，考虑休息一下',
   '适时休息，走得更远',
+  '大脑需要恢复，建议结束当前任务',
 ];
 
 interface TimerDisplayProps {
@@ -17,12 +22,14 @@ interface TimerDisplayProps {
 }
 
 export function TimerDisplay({ state, elapsed }: TimerDisplayProps) {
-  const [messageIndex, setMessageIndex] = useState(0);
+  const [flowIdx, setFlowIdx] = useState(0);
+  const [fatigueIdx, setFatigueIdx] = useState(0);
 
   useEffect(() => {
     if (state.status !== 'flow') return;
     const interval = setInterval(() => {
-      setMessageIndex((i) => (i + 1) % REMINDER_MESSAGES.length);
+      setFlowIdx((i) => (i + 1) % FLOW_MESSAGES.length);
+      setFatigueIdx((i) => (i + 1) % FATIGUE_MESSAGES.length);
     }, 30000);
     return () => clearInterval(interval);
   }, [state.status]);
@@ -55,7 +62,7 @@ export function TimerDisplay({ state, elapsed }: TimerDisplayProps) {
       </div>
       {state.status === 'flow' && (
         <div className="font-display text-flow-muted/60 text-sm tracking-wide animate-fade-in">
-          {REMINDER_MESSAGES[messageIndex]}
+          {elapsed >= 3600 ? FATIGUE_MESSAGES[fatigueIdx] : FLOW_MESSAGES[flowIdx]}
         </div>
       )}
     </div>

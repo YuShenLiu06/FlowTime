@@ -19,6 +19,16 @@ export function useTimerMachine(): {
   const [, setTick] = useState(0);
   const fatigueRef = useRef<{ phase60: boolean; phase90: boolean }>({ phase60: false, phase90: false });
 
+  // 调试工具：暴露到 window 供控制台使用
+  useEffect(() => {
+    (window as any).__flowtime = {
+      advance: (ms: number) => dispatch({ type: 'TIME_WARP', shiftMs: ms }),
+      advanceMin: (min: number) => dispatch({ type: 'TIME_WARP', shiftMs: min * 60 * 1000 }),
+      dispatch: (event: AppEvent) => dispatch(event),
+    };
+    return () => { delete (window as any).__flowtime; };
+  }, []);
+
   const clearTimer = useCallback(() => {
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current);

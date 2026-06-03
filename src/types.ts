@@ -31,7 +31,8 @@ export type AppEvent =
   | { type: 'RESTORE'; session: PersistedSession }
   | { type: 'SUBMIT_SUMMARY'; text: string }
   | { type: 'DISMISS_SUMMARY' }
-  | { type: 'OPEN_SUMMARY' };
+  | { type: 'OPEN_SUMMARY' }
+  | { type: 'TIME_WARP'; shiftMs: number };
 
 export interface PersistedSession {
   version: 2;
