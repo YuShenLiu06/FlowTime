@@ -8,6 +8,7 @@ import { BreakPanel } from '../components/BreakPanel';
 import { SummaryDialog } from '../components/SummaryDialog';
 import { PausedTimer } from '../components/PausedTimer';
 import { AppNav } from '../components/AppNav';
+import { updateHistory } from '../lib/history';
 import type { AppState } from '../types';
 
 function bgClass(state: AppState): string {
@@ -81,7 +82,10 @@ export function HomePage() {
         <SummaryDialog
           record={state.pendingRecord}
           isOpen={state.isPendingSummary}
-          onSubmit={(text) => dispatch({ type: 'SUBMIT_SUMMARY', text })}
+          onSubmit={(text) => {
+            dispatch({ type: 'SUBMIT_SUMMARY', text });
+            updateHistory(state.pendingRecord.id, { summary: text });
+          }}
           onDismiss={() => dispatch({ type: 'DISMISS_SUMMARY' })}
         />
       )}

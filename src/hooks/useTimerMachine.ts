@@ -72,12 +72,10 @@ export function useTimerMachine(): {
       flashRef.current = setupTitleFlash('FlowTime — 心流守护者');
       const breakEndsAt = state.breakEndsAt;
       const task = state.task;
-      const pendingRecord = state.pendingRecord;
       intervalRef.current = setInterval(() => {
         setTick((t) => t + 1);
         if (breakEndsAt - Date.now() <= 0) {
           sendBreakNotification(task);
-          appendHistory(pendingRecord);
           dispatch({ type: 'BREAK_DONE' });
         }
       }, 200);
@@ -87,7 +85,6 @@ export function useTimerMachine(): {
   }, [state.status, clearTimer,
     state.status === 'break' ? (state as { breakEndsAt: number }).breakEndsAt : undefined,
     state.status === 'break' ? (state as { task: string }).task : undefined,
-    state.status === 'break' ? (state as { pendingRecord: any }).pendingRecord : undefined,
   ]);
 
   // Effect 3: 页面可见性 + Wake Lock
@@ -160,20 +157,32 @@ export function useTimerMachine(): {
       ? Math.floor((Date.now() - state.pausedAt) / 1000)
       : 0;
 
-  // Effect 5: break→idle 时保存历史（覆盖 SKIP_BREAK 场景）
+  // Effect 5: break 进入时立即保存历史
   const prevStatusRef = useRef(state.status);
   const breakRecordRef = useRef(state.status === 'break' ? state.pendingRecord : null);
   useEffect(() => {
     if (state.status === 'break') {
       breakRecordRef.current = state.pendingRecord;
+      appendHistory(state.pendingRecord);
     }
     const prev = prevStatusRef.current;
-    if (prev === 'break' && state.status === 'idle' && breakRecordRef.current) {
-      appendHistory(breakRecordRef.current);
+    if (prev === 'break' && state.status === 'idle') {
       breakRecordRef.current = null;
     }
     prevStatusRef.current = state.status;
   }, [state.status, state.status === 'break' ? state.pendingRecord.id : '']);
+
+  // 卸载安全网：break 状态时卸载，保存 pendingRecord
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  useEffect(() => {
+    return () => {
+      const s = stateRef.current;
+      if (s.status === 'break' && s.pendingRecord) {
+        appendHistory(s.pendingRecord);
+      }
+    };
+  }, []);
 
   return { state, dispatch, elapsed, pausedFor };
 }

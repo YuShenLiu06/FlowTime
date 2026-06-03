@@ -27,6 +27,18 @@ export function getTaskById(id: string): TaskRecord | null {
   return getAllHistory().find(r => r.id === id) ?? null;
 }
 
+export function updateHistory(id: string, updates: Partial<Omit<TaskRecord, 'id'>>): void {
+  const history = getAllHistory();
+  const index = history.findIndex((r) => r.id === id);
+  if (index === -1) return;
+  history[index] = { ...history[index], ...updates };
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    // ignore
+  }
+}
+
 function pruneHistory(history: TaskRecord[], maxRecords: number): void {
   if (history.length > maxRecords) {
     history.splice(maxRecords);
