@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# FlowTime
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> A PWA focus timer with finite state machine architecture.
 
-Currently, two official plugins are available:
+专注计时器，使用有限状态机管理工作流：idle → flow → paused → break。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Pure State Machine** — 状态逻辑与副作用分离，代码可预测、可测试
+- **Session Recovery** — 页面刷新或浏览器关闭后自动恢复计时
+- **PWA** — 可安装到桌面/主屏幕，离线使用
+- **Break Recommendations** — 根据专注时长智能推荐休息时长
+- **Statistics Dashboard** — 可视化专注数据（今日、本周、平均时长）
+- **Task History** — 记录所有完成的专注任务
+- **Browser Notifications** — 计时结束时通知提醒
+- **Wake Lock** — 防止屏幕休眠
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- **React 18** + TypeScript
+- **Vite** — 构建工具
+- **Tailwind CSS** — 样式
+- **React Router** — 路由
+- **Recharts** — 统计图表
+- **vite-plugin-pwa** — PWA 支持
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```bash
+# 安装依赖
+npm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# 开发模式
+npm run dev
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 构建生产版本
+npm run build
+
+# 预览生产版本
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## State Machine
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+┌──────┐    START    ┌──────┐   PAUSE   ┌────────┐
+│ idle │ ──────────►│ flow │ ────────►│ paused │
+└──────┘            └──┬───┘           └───┬────┘
+     ▲                  │                    │
+     │                  │ FINISH             │ RESUME
+     │                  ▼                    │
+     │               ┌──────┐               │
+     │               │ break│◄──────────────┘
+     │               └──┬───┘
+     │                  │ SKIP/EXPIRE
+     └──────────────────┘
+```
+
+### States
+
+| State | Description |
+|-------|-------------|
+| `idle` | 初始状态，输入任务名称 |
+| `flow` | 专注中，计时进行 |
+| `paused` | 暂停，计时暂停 |
+| `break` | 休息中，独立倒计时 |
+
+### Events
+
+`START`, `PAUSE`, `RESUME`, `FINISH`, `SKIP`, `EXPIRE`, `RESTORE`, `DISMISS`
+
+## Architecture
+
+```
+src/
+├── types.ts              # AppState, AppEvent 类型定义
+├── lib/
+│   ├── fsm.ts            # 状态机 reducer（纯函数）
+│   ├── time.ts           # 时间格式化和休息时长计算
+│   ├── storage.ts        # localStorage 持久化
+│   ├── notify.ts         # 浏览器通知
+│   ├── history.ts        # 任务历史 CRUD
+│   ├── stats.ts          # 统计数据计算
+│   ├── audio.ts          # 音频反馈
+│   └── wake_lock.ts      # 屏幕 Wake Lock
+├── hooks/
+│   ├── useTimerMachine.ts # 状态机 + 副作用
+│   └── useRecovery.ts     # 启动时恢复会话
+├── components/           # UI 组件
+└── pages/
+    ├── HomePage.tsx       # 主页（计时器）
+    └── HistoryPage.tsx    # 历史记录（统计）
+```
+
+## Design Principles
+
+- **状态逻辑是纯的，副作用在 hook 中隔离**
+- **不要在 reducer 中混入副作用**
+- 修改行为时：
+  - 状态转换 → 修改 `fsmReducer`
+  - 持久化/定时器/通知 → 修改 `useTimerMachine`
+
+## License
+
+MIT
