@@ -96,6 +96,12 @@ npm run lint
 
 # Preview production build locally
 npm run preview
+
+# Electron desktop app — development with HMR
+npm run electron:dev
+
+# Build & package Windows desktop app (NSIS installer + portable exe)
+npm run build:desktop
 ```
 
 ## PWA Configuration
@@ -106,6 +112,21 @@ PWA is configured in `vite.config.ts` using `vite-plugin-pwa`:
 - Workbox caches `**/*.{js,css,html,svg,png,ico}`
 
 PWA icons (`pwa-192x192.png`, `pwa-512x512.png`) should be in the project root.
+
+## Desktop Packaging (Electron)
+
+FlowTime also ships as a Windows desktop app via Electron + electron-builder (no external browser needed).
+
+- **Main process**: `electron/main.cjs` (CommonJS `.cjs` to coexist with the project's `"type": "module"`). Creates the `BrowserWindow`, enforces single-instance, sets `app.setAppUserModelId` so Windows notifications are attributed to FlowTime, and loads `dist/index.html` (production) or `http://localhost:5173` (dev).
+- **Two required changes for `file://` loading** (both Web-compatible, do not affect the PWA build):
+  - `vite.config.ts` `base: './'` — relative asset paths so `dist/index.html` resolves `./assets/*` under `file://`.
+  - `HashRouter` in `src/main.tsx` — `BrowserRouter` breaks on `file://` refresh.
+- **PWA is conditionally disabled** when `VITE_BUILD_TARGET=desktop` is set (service workers cannot register under `file://`).
+- **`appId` must equal `setAppUserModelId`** (`com.flowtime.app`) — keep them in sync or notifications show the sender as "Electron".
+- **Icon**: `build/icon.ico` is generated from `public/pwa-512x512.png` via `npm run gen:icon` (run automatically as the first step of `build:desktop`).
+- **Output**: `release/` → NSIS installer (`FlowTime Setup x.x.x.exe`), portable (`FlowTime-Portable-x.x.x.exe`), and `win-unpacked/FlowTime.exe`.
+
+**Repackaging:** `npm run build:desktop`. Builds are unsigned, so Windows SmartScreen warns on first launch ("More info → Run anyway").
 
 ## Styling
 

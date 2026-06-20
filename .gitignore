@@ -28,3 +28,7 @@ dist-ssr
 # Claude Code
 .claude/
 .playwright-mcp/
+
+# Desktop build output (electron-builder)
+release/
+build/icon.ico
