@@ -31,4 +31,4 @@ dist-ssr
 
 # Desktop build output (electron-builder)
 release/
-build/icon.ico
+build/icon2.ico

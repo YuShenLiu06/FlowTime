@@ -123,7 +123,7 @@ FlowTime also ships as a Windows desktop app via Electron + electron-builder (no
   - `HashRouter` in `src/main.tsx` — `BrowserRouter` breaks on `file://` refresh.
 - **PWA is conditionally disabled** when `VITE_BUILD_TARGET=desktop` is set (service workers cannot register under `file://`).
 - **`appId` must equal `setAppUserModelId`** (`com.flowtime.app`) — keep them in sync or notifications show the sender as "Electron".
-- **Icon**: `build/icon.ico` is generated from `public/pwa-512x512.png` via `npm run gen:icon` (run automatically as the first step of `build:desktop`).
+- **Icon**: `build/icon2.ico` is generated from `build/icon2.png` via `npm run gen:icon` (run automatically as the first step of `build:desktop`).
 - **Output**: `release/` → NSIS installer (`FlowTime Setup x.x.x.exe`), portable (`FlowTime-Portable-x.x.x.exe`), and `win-unpacked/FlowTime.exe`.
 
 **Repackaging:** `npm run build:desktop`. Builds are unsigned, so Windows SmartScreen warns on first launch ("More info → Run anyway").

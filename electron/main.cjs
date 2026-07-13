@@ -24,7 +24,7 @@ function createWindow() {
   // 开发模式显式指定窗口图标；打包后窗口图标由 .exe 图标决定，无需指定。
   const iconPath = app.isPackaged
     ? undefined
-    : path.join(__dirname, '..', 'build', 'icon.ico');
+    : path.join(__dirname, '..', 'build', 'icon2.ico');
 
   const win = new BrowserWindow({
     width: 960,
